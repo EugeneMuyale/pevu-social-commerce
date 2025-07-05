@@ -1,0 +1,191 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: pevu_social_commerce
+      POSTGRES_USER: pevu_user
+      POSTGRES_PASSWORD: Pevu123!
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    ports:
+      - '9002:9000'
+      - '9003:9001'
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+
+  auth-service:
+    build:
+      context: ./backend/auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+      JWT_SECRET: pevu_super_secret_key_123_very_long_and_secure_for_jwt_signing_256_bits_minimum_requirement
+    ports:
+      - '8093:8080'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  product-service:
+    build:
+      context: ./backend/product-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+    ports:
+      - '8094:8080'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  media-service:
+    build:
+      context: ./backend/media-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: 104857600
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: 104857600
+    ports:
+      - '8092:8080'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  order-service:
+    build:
+      context: ./backend/order-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+    ports:
+      - '8095:8080'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  cart-wishlist-service:
+    build:
+      context: ./backend/cart-wishlist-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+    ports:
+      - '8096:8085'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  user-profile-service:
+    build:
+      context: ./backend/user-profile-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+    ports:
+      - '8091:8086'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  social-interaction-service:
+    build:
+      context: ./backend/social-interaction-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pevu_social_commerce
+      SPRING_DATASOURCE_USERNAME: pevu_user
+      SPRING_DATASOURCE_PASSWORD: Pevu123!
+    ports:
+      - '8090:8087'
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  pevu-client:
+    build:
+      context: ./frontend/pevu-client
+    networks:
+      - frontend
+    depends_on:
+      - auth-service
+      - product-service
+      - media-service
+      - order-service
+      - cart-wishlist-service
+      - user-profile-service
+      - social-interaction-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:1.27
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/docker/wait-for-it.sh:/wait-for-it.sh
+    depends_on:
+      pevu-client:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+      media-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      cart-wishlist-service:
+        condition: service_started
+      user-profile-service:
+        condition: service_started
+      social-interaction-service:
+        condition: service_started
+    networks:
+      - frontend
+      - backend
+    entrypoint: ["/wait-for-it.sh", "auth-service:8080", "-t", "60", "--", "nginx", "-g", "daemon off;"]
+
+volumes:
+  pgdata:
+  minio_data:
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge 

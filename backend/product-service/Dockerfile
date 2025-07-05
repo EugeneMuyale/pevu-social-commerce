@@ -1,0 +1,15 @@
+FROM eclipse-temurin:21-jdk-alpine as build
+WORKDIR /app
+COPY . .
+COPY gradle-8.14.1-bin.zip /tmp/gradle-8.14.1-bin.zip
+ENV GRADLE_USER_HOME=/tmp/gradle-home
+RUN mkdir -p $GRADLE_USER_HOME/wrapper/dists/gradle-8.14.1-bin && \
+    unzip /tmp/gradle-8.14.1-bin.zip -d $GRADLE_USER_HOME/wrapper/dists/gradle-8.14.1-bin/ && \
+    ./gradlew bootJar
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN apk add --no-cache curl
+COPY build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"] 

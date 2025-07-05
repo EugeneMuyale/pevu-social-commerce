@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 104857600
+      max-request-size: 104857600
+
+minio:
+  url: http://minio:9000
+  access-key: minioadmin
+  secret-key: minioadmin123 
