@@ -4,4 +4,4 @@ COPY . .
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "build/libs/*.jar"] 
+ENTRYPOINT ["java", "-jar", "build/libs/auth-service-0.1.0.jar"] 
