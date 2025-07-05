@@ -3,5 +3,6 @@ WORKDIR /app
 COPY . .
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
+RUN ls -la build/libs/
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "build/libs/auth-service-0.1.0.jar"] 
+ENTRYPOINT ["sh", "-c", "java -jar build/libs/$(ls build/libs/*.jar | head -1)"] 
