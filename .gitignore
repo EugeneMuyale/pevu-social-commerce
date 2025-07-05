@@ -46,6 +46,7 @@ coverage/
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+gradle-*-bin.zip
 
 # IntelliJ IDEA
 .idea/
