@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'minio'],
+    domains: ['localhost', 'minio', 'pevu-media-service.onrender.com'],
     remotePatterns: [
       {
         protocol: 'http',
@@ -13,6 +13,11 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'minio',
         port: '9000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pevu-media-service.onrender.com',
         pathname: '/**',
       },
     ],
