@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://db.tcojfmhacvtjfzcmdpyv.supabase.co:5432/postgres
-    username: postgres
-    password: PevuForLife
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
