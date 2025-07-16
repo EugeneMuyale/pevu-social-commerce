@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/pevu_social_commerce}
-    username: ${DB_USERNAME:pevu_user}
-    password: ${DB_PASSWORD:Pevu123!}
+    url: jdbc:postgresql://db.tcojfmhacvtjfzcmdpyv.supabase.co:5432/postgres
+    username: postgres
+    password: PevuForLife
   jpa:
     hibernate:
       ddl-auto: update

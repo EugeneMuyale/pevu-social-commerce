@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class AuthServiceApplication
 
 fun main(args: Array<String>) {
+    println("DATABASE_URL env: " + System.getenv("DATABASE_URL"))
     runApplication<AuthServiceApplication>(*args)
 } 
